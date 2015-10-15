@@ -10,10 +10,13 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Dependency Tree Annotate Tool</title>
-        <link href="./css/bootstrap.min.css" rel="stylesheet">
-        <script src="./js/jquery-1.7.2.min.js"></script>
-        <script src="./js/bootstrap.min.js"></script>
+
         <script src="./js/FileSaver.min.js"></script>
+        <script src="./js/jquery-1.10.2.js"></script>
+        <script src="./js/jquery-ui.js"></script>
+        <script src="./js/bootstrap.min.js"></script>
+        <link href="./css/bootstrap.min.css" rel="stylesheet">
+        <link href="./css/jquery-ui.css" rel="stylesheet">
         <style media="screen" type="text/css">
             .picture {
                 position: relative;
@@ -35,8 +38,8 @@
         <script>
             var first = -1;
             var second = -1;
-            var fa = [], edus = [], operations = [];
-            var inputFile = '';
+            var fa = [], edus = [], operations = [], depRel = [];
+            var inputFile = '', rel = '';
             var relations = ['Attribution', 'Background', 'Cause',
                              'Comparison', 'Condition', 'Contrast',
                              'Elaboration', 'Enablement', 'evaluation',
@@ -50,7 +53,6 @@
                     document.getElementById(id).setAttribute('style', 'background-color: green');
                     var op = {'type': 'click', 'index': index};
                     operations.push(op);
-                    // disable node that already has a parent node
                     for (var i = 0; i < fa.length; ++i) {
                         if (fa[i] >= 0 || i === first) {
                             $('#edu' + i.toString()).prop('disabled', true);
@@ -67,24 +69,7 @@
                     return;
                 }
                 second = index;
-                fa[second] = first;
-                document.getElementById('edu' + first.toString()).setAttribute('style', 'background-color: white');
-                for (var i = 0; i < fa.length; ++i) {
-                    $('#edu' + i.toString()).prop('disabled', false);
-                }
-                $('#parent' + second.toString())[0].textContent = first.toString();
-                var id1 = 'parent' + first.toString();
-                var id2 = 'parent' + second.toString();
-                if (operations.length > 0 && operations[operations.length - 1]['type'] === 'click') {
-                    operations.splice(operations.length - 1, 1);
-                }
-                var op = {'type': 'connect', 'id1': first.toString(), 'id2': second.toString()};
-                operations.push(op);
-                drawCurve(id1, id2, 'red');
-                addRelation(id1, id2, 0);
-                first = -1; second = -1;
-                updateProgress();
-                return;
+                popRelation();
             };
             function updateProgress() {
                 var total = fa.length - 1;
@@ -105,7 +90,7 @@
                 }
                 var data = {'root': []};
                 for (var i = 0; i < fa.length; ++i) {
-                    var cur = {'parent': fa[i], 'text': edus[i]};
+                    var cur = {'parent': fa[i], 'text': edus[i], 'relation': depRel[i]};
                     data['root'].push(cur);
                 }
                 var outFileName = inputFile + '.dep';
@@ -133,14 +118,14 @@
                     var id1 = op['id1'], id2 = op['id2'];
                     document.getElementById('parent' + id1).textContent = 'null';
                     document.getElementById('parent' + id2).textContent = 'null';
-                    fa[parseInt(id2)] = -1;
-                    $('#edu' + id2).prop('disabled', false);
+                    fa[parseInt(id2)] = -1; depRel[parseInt(id2)] = 'null';
                     var ctx = document.getElementById('canvas').getContext('2d');
                     var canvas = document.getElementById('canvas');
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     for (var i = 0; i < fa.length; ++i) {
                         if (fa[i] >= 0) {
                             drawCurve('parent' + fa[i].toString(), 'parent' + i, 'red');
+                            addRelation('parent' + fa[i].toString(), 'parent' + i, depRel[i]);
                         }
                     }
                 }
@@ -150,7 +135,7 @@
             }
         </script>
     </head>
-    <body>
+    <body id="body">
         <div class="picture">
         <canvas id="canvas" height="1500" width="1500"></canvas>
         <%
@@ -180,7 +165,58 @@
         <br>
         <div class="container blob2" id="list">
         </div>
+        <div id="dialog-form" title="Add a relation">
+          <form>
+                 <select class="form-control" id="select" name="select" >
+                 </select>
+          </form>
+        </div>
+        <script>
+            function popRelation() {
+              var dialog;
+              function relationCallback() {
+                  rel = $('#select')[0].options[select.selectedIndex].text;
+                  dialog.dialog('close');
+                  fa[second] = first;
+                  document.getElementById('edu' + first.toString()).setAttribute('style', 'background-color: white');
+                  for (var i = 0; i < fa.length; ++i) {
+                      $('#edu' + i.toString()).prop('disabled', false);
+                  }
+                  $('#parent' + second.toString())[0].textContent = first.toString();
+                  var id1 = 'parent' + first.toString();
+                  var id2 = 'parent' + second.toString();
+                  if (operations.length > 0 && operations[operations.length - 1]['type'] === 'click') {
+                      operations.splice(operations.length - 1, 1);
+                  }
+                  var op = {'type': 'connect', 'id1': first.toString(), 'id2': second.toString()};
+                  operations.push(op);
+                  drawCurve(id1, id2, 'red');
+                  addRelation(id1, id2, rel);
+                  depRel[second] = rel;
+                  first = -1; second = -1;
+                  updateProgress();
+              }
+              dialog = $( "#dialog-form" ).dialog({
+                autoOpen: false,
+                height: 300,
+                width: 350,
+                modal: true,
+                buttons: {
+                  "OK": relationCallback
+                }
+              });
+              rel = '';
+              dialog.dialog("open");
+            };
+        </script>
 
+        <script>
+            var res = '';
+            for (var i = 0; i < relations.length; ++i) {
+                res += '<option>' + relations[i] + '</option>';
+            }
+            $('#select').html(res);
+        </script>
         <script>
             function findPos(obj) {
                 var curLeft = curTop = 0;
@@ -199,9 +235,9 @@
                 }
                 return parseInt(s.substr(i + 1));
             }
-            function addRelation(id1, id2, index) {
-                if (index >= relations.length) {
-                    alert('Invalid relation index!');
+            function addRelation(id1, id2, relation) {
+                if (relation.length === 0) {
+                    alert('Invalid relation');
                     return;
                 }
                 id1;
@@ -215,8 +251,8 @@
                 var ctx = document.getElementById('canvas').getContext('2d');
                 ctx.font = "10px Arial";
                 ctx.fillStyle = 'blue';
-                while (relations[index].length < 45) relations[index] = ' ' + relations[index];
-                ctx.fillText(relations[index], 0, centerZ.y);
+                while (relation.length < 42) relation = ' ' + relation;
+                ctx.fillText(relation, 0, centerZ.y);
             }
             function drawCurve(id1, id2, color) {
                 var centerX = findPos(document.getElementById(id1));
@@ -255,11 +291,12 @@
             }
             function loadJsonData(e) {
                 var obj = JSON.parse(e.target.result);
-                fa = []; edus = [];
+                fa = []; edus = []; depRel = [];
                 obj = obj['root'];
                 for (var i = 0; i < obj.length; ++i) {
                     fa[i] = obj[i]['parent'];
                     edus[i] = obj[i]['text'];
+                    depRel[i] = obj[i]['relation'];
                 }
                 var res = '';
                 for (var i = 0; i < fa.length; ++i) {
@@ -279,6 +316,7 @@
                 for (var i = 0; i < fa.length; ++i) {
                     if (fa[i] >= 0) {
                         drawCurve('parent' + fa[i].toString(), 'parent' + i.toString(), 'red');
+                        addRelation('parent' + fa[i].toString(), 'parent' + i.toString(), depRel[i]);
                     }
                 }
                 updateProgress();
@@ -292,7 +330,7 @@
                              + '<h5>ROOT</h5>'
                              + '</button>'
                              + '</div><br><br><br>';
-                fa = [-1];
+                fa = [-1]; delRel = ['null'];
                 edus = ['ROOT'];
                 var MAX_N = 150;
                 for (var i = contents.length - 1; i >= 0; --i) {
@@ -313,7 +351,7 @@
                              + '<h5>' + contents[i] + '</h5>'
                              + '</button>'
                              + '</div><br><br><br>';
-                     fa.push(-1);
+                     fa.push(-1); depRel.push('null');
                      edus.push(contents[i]);
                 }
                 $('#list').html(res);
