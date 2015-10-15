@@ -37,6 +37,12 @@
             var second = -1;
             var fa = [], edus = [], operations = [];
             var inputFile = '';
+            var relations = ['Attribution', 'Background', 'Cause',
+                             'Comparison', 'Condition', 'Contrast',
+                             'Elaboration', 'Enablement', 'evaluation',
+                             'explanation', 'joint', 'manner-means',
+                             'summary', 'temporal', 'topic-change',
+                             'topic-comment', 'same-unit', 'textual'];
             function sendReq(id) {
                 var index = parseInt(id.toString().substr(3));
                 if (first === -1) {
@@ -44,6 +50,12 @@
                     document.getElementById(id).setAttribute('style', 'background-color: green');
                     var op = {'type': 'click', 'index': index};
                     operations.push(op);
+                    // disable node that already has a parent node
+                    for (var i = 0; i < fa.length; ++i) {
+                        if (fa[i] >= 0 || i === first) {
+                            $('#edu' + i.toString()).prop('disabled', true);
+                        }
+                    }
                     return;
                 }
                 if (index === 0) {
@@ -57,7 +69,9 @@
                 second = index;
                 fa[second] = first;
                 document.getElementById('edu' + first.toString()).setAttribute('style', 'background-color: white');
-                $('#edu' + second.toString()).prop('disabled', true);
+                for (var i = 0; i < fa.length; ++i) {
+                    $('#edu' + i.toString()).prop('disabled', false);
+                }
                 $('#parent' + second.toString())[0].textContent = first.toString();
                 var id1 = 'parent' + first.toString();
                 var id2 = 'parent' + second.toString();
@@ -67,6 +81,7 @@
                 var op = {'type': 'connect', 'id1': first.toString(), 'id2': second.toString()};
                 operations.push(op);
                 drawCurve(id1, id2, 'red');
+                addRelation(id1, id2, 0);
                 first = -1; second = -1;
                 updateProgress();
                 return;
@@ -110,6 +125,9 @@
                 if (op['type'] === 'click') {
                     document.getElementById('edu' + first.toString()).setAttribute('style', 'background-color: white');
                     first = -1;
+                    for (var i = 0; i < fa.length; ++i) {
+                        $('#edu' + i.toString()).prop('disabled', false);
+                    }
                 }
                 else if (op['type'] === 'connect') {
                     var id1 = op['id1'], id2 = op['id2'];
@@ -161,22 +179,7 @@
 
         <br>
         <div class="container blob2" id="list">
-<!--            <div class="col-lg-10 col-md-10 col-sm-10" id="x">
-                <button id="edu0" type="button" class="btn btn-default" style="background-color: grey">
-                    <h5>This is a long sentence long sentence long sentence.</h5>
-                </button>
-            </div><br><br>
-            <div class="col-lg-10 col-md-10 col-sm-10">
-                <button id="edu1" type="button" class="btn btn-default" disabled>
-                    <h5>This is a long sentence.</h5>
-                </button>
-            </div><br><br>
-            <div class="col-lg-10 col-md-10 col-sm-10" id="z">
-                <button id="edu2" type="button" class="btn btn-default" onclick="sendReq('edu2')">
-                    <h5>This is a long sentence long sentence long sentence.This is a long sentence long sentence long sentence.</h5>
-                </button>
-            </div><br><br>-->
-        </div></div>
+        </div>
 
         <script>
             function findPos(obj) {
@@ -188,6 +191,32 @@
                     } while (obj = obj.offsetParent);
                 }
                 return {x:curLeft, y:curTop};
+            }
+            function getTrimNumber(s) {
+                var i = s.length - 1;
+                while (i >= 0 && s[i] >= '0' && s[i] <= '9') {
+                    --i;
+                }
+                return parseInt(s.substr(i + 1));
+            }
+            function addRelation(id1, id2, index) {
+                if (index >= relations.length) {
+                    alert('Invalid relation index!');
+                    return;
+                }
+                id1;
+                var centerZ = findPos(document.getElementById(id2));
+                centerZ.x += document.getElementById(id2).style.width;
+                centerZ.y += document.getElementById(id2).style.height;
+                var canvasPos = findPos(document.getElementById('canvas'));
+                centerZ.x -= canvasPos.x;
+                centerZ.y -= canvasPos.y;
+                centerZ.y += 15;
+                var ctx = document.getElementById('canvas').getContext('2d');
+                ctx.font = "10px Arial";
+                ctx.fillStyle = 'blue';
+                while (relations[index].length < 45) relations[index] = ' ' + relations[index];
+                ctx.fillText(relations[index], 0, centerZ.y);
             }
             function drawCurve(id1, id2, color) {
                 var centerX = findPos(document.getElementById(id1));
@@ -202,17 +231,18 @@
                 centerZ.x -= canvasPos.x;
                 centerZ.y -= canvasPos.y;
                 centerX.y += 5; centerZ.y += 5;
+                var width = findPos(document.getElementById(id1)).x;
+                var offX = width - width * Math.abs(getTrimNumber(id1) - getTrimNumber(id2)) / (fa.length - 1);
                 var ctx = document.getElementById('canvas').getContext('2d');
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(centerX.x, centerX.y);
-                ctx.bezierCurveTo(0, centerX.y, 0, centerZ.y, centerZ.x, centerZ.y);
-//              ctx.lineTo(centerZ.x, centerZ.y);
+                ctx.bezierCurveTo(offX, centerX.y, offX, centerZ.y, centerZ.x, centerZ.y);
                 ctx.stroke();
 
                 ctx.beginPath();
-                var radius = 8;
+                var radius = 5;
                 ctx.fillStyle = color;
                 ctx.moveTo(centerZ.x - radius, centerZ.y - radius);
                 ctx.lineTo(centerZ.x - radius, centerZ.y + radius);
@@ -233,9 +263,11 @@
                 }
                 var res = '';
                 for (var i = 0; i < fa.length; ++i) {
+                    var father = 'null';
+                    if (fa[i] >= 0) father = fa[i].toString();
                     res += '<div class="col-lg-12 col-md-12 col-sm-12">'
                              + '<span class="label label-info" id="parent' + i.toString()
-                             + '">null</span>'
+                             + '">' + father + '</span>'
                              + '<button id="edu' + i.toString()
                              + '" type="button" onclick="sendReq(\'edu' + i.toString() + '\')"'
                              + ' class="btn btn-default" style="background-color: white">'
@@ -246,7 +278,7 @@
                 $('#list').html(res);
                 for (var i = 0; i < fa.length; ++i) {
                     if (fa[i] >= 0) {
-                        drawCurve('parent' + fa[i].toString(), 'parent' + i.toString());
+                        drawCurve('parent' + fa[i].toString(), 'parent' + i.toString(), 'red');
                     }
                 }
                 updateProgress();
@@ -302,7 +334,8 @@
               var ctx = document.getElementById('canvas').getContext('2d');
               var canvas = document.getElementById('canvas');
               ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+              operations = [];
+              first = second = -1;
             };
             document.getElementById('files').addEventListener('change', handleFileSelect, false);
         </script>
