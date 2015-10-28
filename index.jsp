@@ -10,12 +10,14 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Dependency Tree Annotate Tool</title>
-        <script src="./js/FileSaver.min.js"></script>
-        <script src="./js/jquery-1.10.2.js"></script>
-        <script src="./js/jquery-ui.js"></script>
+        <script src="./js/jquery-1.11.3.min.js"></script>
         <script src="./js/bootstrap.min.js"></script>
+        <script src="./js/jquery-ui.min.js"></script>
+        <script src="./js/FileSaver.min.js"></script>
         <link href="./css/bootstrap.min.css" rel="stylesheet">
-        <link href="./css/jquery-ui.css" rel="stylesheet">
+        <link href="./css/jquery-ui.min.css" rel="stylesheet">
+        <link href="./css/jquery-ui.structure.min.css" rel="stylesheet">
+        <link href="./css/jquery-ui.theme.min.css" rel="stylesheet">
         <style media="screen" type="text/css">
             .picture {
                 position: relative;
@@ -235,7 +237,7 @@
               dialog = $( "#dialog-form" ).dialog({
                 autoOpen: false,
                 height: 200,
-                width: 350,
+                width: 450,
                 modal: true,
                 buttons: {
                   "OK": relationCallback
@@ -352,6 +354,7 @@
                              + '</button>'
                              + '</div><br><br><br>';
                 }
+                updateCanvasHeight();
                 $('#list').html(res);
                 for (var i = 0; i < fa.length; ++i) {
                     if (fa[i] >= 0) {
@@ -359,7 +362,6 @@
                         addRelation('parent' + fa[i].toString(), 'parent' + i.toString(), depRel[i]);
                     }
                 }
-                updateCanvasHeight();
                 updateProgress();
             }
             function loadRawData(e) {
