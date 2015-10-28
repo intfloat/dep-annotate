@@ -136,7 +136,7 @@
     </head>
     <body id="body">
         <div class="picture">
-        <canvas id="canvas" height="1500" width="1500"></canvas>
+        <canvas id="canvas" height="4500" width="1500"></canvas>
         <%
             for (int i = 0; i < 3; ++i) {
                 out.println("<br>");
@@ -158,6 +158,10 @@
             <div class="col-lg-2 col-md-2 col-sm-2">
                 <input type="button" class="btn btn-info" value="Delete label" onclick="deleteLabel()">
             </div>
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <input type="file" id="relation-file" style="display: none" />
+                <input type="button" class="btn btn-info" value="Customized label set" id="fakeBrowse" onclick="HandleBrowseClick();"/>
+            </div>
         </div>
 
         <div class="container mybar">
@@ -170,7 +174,7 @@
         <br>
         <div class="container blob2" id="list">
         </div>
-        <div id="dialog-form" title="Add a relation">
+        <div id="dialog-form" title="Add a relation" hidden="true">
           <form>
                  <select class="form-control" id="select" name="select" >
                  </select>
@@ -184,6 +188,25 @@
           </form>
         </div>
         <script>
+            function HandleBrowseClick() {
+                $('#relation-file').click();
+            }
+            function Handlechange(evt) {
+                var file = evt.target.files[0];
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var contents = e.target.result.split('\n');
+                    relations = [];
+                    for (var i = 0; i < contents.length; ++i) {
+                        var r = contents[i].trim();
+                        if (r.length > 0 && relations.indexOf(r) < 0) {
+                            relations.push(r);
+                        }
+                    }
+                    alert('SUCCESSFULLY load ' + relations.length.toString() + ' relations.');
+                };
+                reader.readAsText(file);
+            }
             function popRelation() {
               var dialog;
               function relationCallback() {
@@ -385,6 +408,7 @@
               first = second = -1;
             };
             document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            document.getElementById('relation-file').addEventListener('change', Handlechange, false);
 
             function addLabel() {
                 var label = prompt('New relation:').toString().toLowerCase();
