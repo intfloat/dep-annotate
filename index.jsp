@@ -1,7 +1,7 @@
 <%--
-    Document   : index
+    Document   : index.jsp
     Created on : 2015-10-6, 23:38:01
-    Author     : air
+    Author     : Liang Wang
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -10,7 +10,6 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Dependency Tree Annotate Tool</title>
-
         <script src="./js/FileSaver.min.js"></script>
         <script src="./js/jquery-1.10.2.js"></script>
         <script src="./js/jquery-ui.js"></script>
@@ -40,9 +39,9 @@
             var second = -1;
             var fa = [], edus = [], operations = [], depRel = [];
             var inputFile = '', rel = '';
-            var relations = ['Attribution', 'Background', 'Cause',
-                             'Comparison', 'Condition', 'Contrast',
-                             'Elaboration', 'Enablement', 'evaluation',
+            var relations = ['attribution', 'background', 'cause',
+                             'comparison', 'condition', 'contrast',
+                             'elaboration', 'enablement', 'evaluation',
                              'explanation', 'joint', 'manner-means',
                              'summary', 'temporal', 'topic-change',
                              'topic-comment', 'same-unit', 'textual'];
@@ -144,7 +143,7 @@
             }
         %>
         <div class="container blob1">
-            <div class="col-lg-4 col-md-4 col-sm-4">
+            <div class="col-lg-2 col-md-2 col-sm-2">
                 <input type="file" id="files" name="files[]" multiple />
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2">
@@ -152,6 +151,12 @@
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2">
                 <input type="button" class="btn btn-info" value="Go back" onclick="undo()">
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <input type="button" class="btn btn-info" value="Add label" onclick="addLabel()">
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <input type="button" class="btn btn-info" value="Delete label" onclick="deleteLabel()">
             </div>
         </div>
 
@@ -169,6 +174,13 @@
           <form>
                  <select class="form-control" id="select" name="select" >
                  </select>
+          </form>
+        </div>
+
+        <div id="new-relation-dialog" title="Remove existing relations">
+          <form>
+                 <ul class="list-group" id="relation-list">
+                </ul>
           </form>
         </div>
         <script>
@@ -198,24 +210,21 @@
               }
               dialog = $( "#dialog-form" ).dialog({
                 autoOpen: false,
-                height: 300,
+                height: 200,
                 width: 350,
                 modal: true,
                 buttons: {
                   "OK": relationCallback
                 }
               });
+              var res = '';
+              for (var i = 0; i < relations.length; ++i) {
+                  res += '<option>' + relations[i] + '</option>';
+              }
+              $('#select').html(res);
               rel = '';
               dialog.dialog("open");
             };
-        </script>
-
-        <script>
-            var res = '';
-            for (var i = 0; i < relations.length; ++i) {
-                res += '<option>' + relations[i] + '</option>';
-            }
-            $('#select').html(res);
         </script>
         <script>
             function findPos(obj) {
@@ -376,6 +385,48 @@
               first = second = -1;
             };
             document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+            function addLabel() {
+                var label = prompt('New relation:').toString().toLowerCase();
+                if (label.length === 0) {
+                    alert('ERROR: Can not be empty');
+                    return;
+                }
+                if (relations.indexOf(label) > 0) {
+                    alert('ERROR: Relation ' + label + ' already exists.');
+                    return;
+                }
+                relations.push(label);
+                alert('SUCCESSFULLY added new relation ' + label);
+            }
+
+            function deleteLabel() {
+                var nullCallback = function() { dialog.dialog('close'); };
+                var dialog = $('#new-relation-dialog').dialog({
+                    autoOpen: false,
+                    height: 600,
+                    width: 350,
+                    modal: true,
+                    buttons: {
+                        'OK': nullCallback
+                    }
+                });
+                var res = '';
+                for (var i = 0; i < relations.length; ++i) {
+                    res += '<li class="list-group-item">' + relations[i]
+                            + '</li>';
+                }
+                $('#relation-list').html(res);
+                $(".list-group-item").on("click", function(){
+                    var r = this.textContent.trim();
+                    $(this).remove();
+                    var pos = relations.indexOf(r);
+                    if (pos >= 0) {
+                        relations.splice(pos, 1);
+                    }
+                });
+                dialog.dialog('open');
+            }
         </script>
     </body>
 </html>
