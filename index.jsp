@@ -147,20 +147,21 @@
                 <input type="file" id="files" name="files[]" multiple />
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Save to local" onclick="saveToFile()">
+                <input type="button" class="btn btn-info" value="Save to local" onclick="saveToFile()" style="visibility:hidden">
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Go back" onclick="undo()">
+                <input type="button" class="btn btn-info" value="Go back" onclick="undo()" hidden="true" style="visibility:hidden">
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Add label" onclick="addLabel()">
+                <input type="button" class="btn btn-info" value="Add label" onclick="addLabel()" hidden="true" style="visibility:hidden">
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Delete label" onclick="deleteLabel()">
+                <input type="button" class="btn btn-info" value="Delete label" onclick="deleteLabel()" hidden="true" style="visibility:hidden">
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2">
                 <input type="file" id="relation-file" style="display: none" />
-                <input type="button" class="btn btn-info" value="Customized label set" id="fakeBrowse" onclick="HandleBrowseClick();"/>
+                <input type="button" class="btn btn-info" value="Customized relation set"
+                       id="fakeBrowse" onclick="HandleBrowseClick();" hidden="true" style="visibility:hidden"/>
             </div>
         </div>
 
@@ -181,7 +182,7 @@
           </form>
         </div>
 
-        <div id="new-relation-dialog" title="Remove existing relations">
+        <div id="new-relation-dialog" title="Click to remove relations">
           <form>
                  <ul class="list-group" id="relation-list">
                 </ul>
@@ -300,7 +301,11 @@
                 centerZ.y -= canvasPos.y;
                 centerX.y += 5; centerZ.y += 5;
                 var width = findPos(document.getElementById(id1)).x;
-                var offX = width - width * Math.abs(getTrimNumber(id1) - getTrimNumber(id2)) / (fa.length - 1);
+                var percent = 1 - Math.abs(getTrimNumber(id1) - getTrimNumber(id2)) / (fa.length - 1);
+                if (edus.length > 30 && percent > 0.5) {
+                    percent = percent - 0.5;
+                }
+                var offX = width * percent;
                 var ctx = document.getElementById('canvas').getContext('2d');
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 2;
@@ -320,6 +325,9 @@
             }
             function endsWith(str, suffix) {
                 return str.indexOf(suffix, str.length - suffix.length) !== -1;
+            }
+            function updateCanvasHeight() {
+                document.getElementById('canvas').height = edus.length / 80 * 4500 + 1500;
             }
             function loadJsonData(e) {
                 var obj = JSON.parse(e.target.result);
@@ -351,6 +359,7 @@
                         addRelation('parent' + fa[i].toString(), 'parent' + i.toString(), depRel[i]);
                     }
                 }
+                updateCanvasHeight();
                 updateProgress();
             }
             function loadRawData(e) {
@@ -386,10 +395,15 @@
                      fa.push(-1); depRel.push('null');
                      edus.push(contents[i]);
                 }
+                updateCanvasHeight();
                 $('#list').html(res);
                 updateProgress();
             }
             function handleFileSelect(evt) {
+              var arr = $('.btn-info');
+              for (var i = 0; i < arr.length; ++i) {
+                  arr[i].style.visibility = "visible";
+              }
               var files = evt.target.files;
               inputFile = files[0];
               var reader = new FileReader();
@@ -438,7 +452,7 @@
                 var res = '';
                 for (var i = 0; i < relations.length; ++i) {
                     res += '<li class="list-group-item">' + relations[i]
-                            + '</li>';
+                            + '<img src="./css/images/remove.jpeg" style="width:20px;height:20px;" align="right"></li>';
                 }
                 $('#relation-list').html(res);
                 $(".list-group-item").on("click", function(){
