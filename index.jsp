@@ -39,6 +39,7 @@
         <script>
             var first = -1;
             var second = -1;
+            var MAX_N = 150;
             var fa = [], edus = [], operations = [], depRel = [];
             var inputFile = '', rel = '';
             var relations = ['attribution', 'background', 'cause',
@@ -109,30 +110,67 @@
                 }
                 var op = operations[operations.length - 1];
                 if (op['type'] === 'click') {
-                    document.getElementById('edu' + first.toString()).setAttribute('style', 'background-color: white');
-                    first = -1;
-                    for (var i = 0; i < fa.length; ++i) {
-                        $('#edu' + i.toString()).prop('disabled', false);
-                    }
+                    recoverClickNode();
                 }
                 else if (op['type'] === 'connect') {
                     var id1 = op['id1'], id2 = op['id2'];
-                    document.getElementById('parent' + id1).textContent = 'null';
-                    document.getElementById('parent' + id2).textContent = 'null';
-                    fa[parseInt(id2)] = -1; depRel[parseInt(id2)] = 'null';
-                    var ctx = document.getElementById('canvas').getContext('2d');
-                    var canvas = document.getElementById('canvas');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    for (var i = 0; i < fa.length; ++i) {
-                        if (fa[i] >= 0) {
-                            drawCurve('parent' + fa[i].toString(), 'parent' + i, 'red');
-                            addRelation('parent' + fa[i].toString(), 'parent' + i, depRel[i]);
-                        }
+                    disconnect(id1, id2);
+                }
+                else if (op['type'] === 'delete') {
+                    var id1 = op['id1'], id2 = op['id2'];
+                    fa[id2] = id1;
+                    depRel[id2] = op['relation'];
+                    connect(id1, id2, 'red', depRel[id2]);
+                }
+                operations.splice(operations.length - 1, 1);
+                updateProgress();
+                return;
+            }
+            function recoverClickNode() {
+                if (first < 0) {
+                    alert('You are not supposed to see this...');
+                    return;
+                }
+                document.getElementById('edu' + first.toString()).setAttribute('style', 'background-color: white');
+                first = -1;
+                for (var i = 0; i < fa.length; ++i) {
+                   $('#edu' + i.toString()).prop('disabled', false);
+                }
+            }
+            function connect(id1, id2, color, rel) {
+                drawCurve('parent' + id1, 'parent' + id2, color);
+                addRelation('parent' + id1, 'parent' + id2, rel);
+                updateProgress();
+            }
+            function disconnect(id1, id2) {
+                document.getElementById('parent' + id1).textContent = 'null';
+                document.getElementById('parent' + id2).textContent = 'null';
+                fa[parseInt(id2)] = -1; depRel[parseInt(id2)] = 'null';
+                var ctx = document.getElementById('canvas').getContext('2d');
+                var canvas = document.getElementById('canvas');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (var i = 0; i < fa.length; ++i) {
+                    if (fa[i] >= 0) {
+                        connect(fa[i], i, 'red', depRel[i]);
                     }
                 }
                 updateProgress();
-                operations.splice(operations.length - 1, 1);
-                return;
+            }
+            // delete edge between selected EDU and its father
+            function deleteEdge() {
+                if (first < 0 || first >= fa.length) {
+                    alert('ERROR: No node selected!');
+                    return;
+                }
+                if (fa[first] < 0) {
+                    alert('ERROR: No incoming edge for current node!');
+                    return;
+                }
+                var id1 = fa[first], id2 = first;
+                var op = {'type': 'delete', 'id1': id1, 'id2': id2, 'relation': depRel[id2]};
+                recoverClickNode(first);
+                disconnect(id1, id2);
+                operations.push(op);
             }
         </script>
     </head>
@@ -148,21 +186,24 @@
             <div class="col-lg-2 col-md-2 col-sm-2">
                 <input type="file" id="files" name="files[]" multiple />
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Save to local" onclick="saveToFile()" style="visibility:hidden">
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="保存" onclick="saveToFile()" style="visibility:hidden">
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Go back" onclick="undo()" hidden="true" style="visibility:hidden">
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="撤销" onclick="undo()" hidden="true" style="visibility:hidden">
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Add label" onclick="addLabel()" hidden="true" style="visibility:hidden">
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="删除边" onclick="deleteEdge()" hidden="true" style="visibility:hidden">
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2">
-                <input type="button" class="btn btn-info" value="Delete label" onclick="deleteLabel()" hidden="true" style="visibility:hidden">
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="加标签" onclick="addLabel()" hidden="true" style="visibility:hidden">
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2">
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="删标签" onclick="deleteLabel()" hidden="true" style="visibility:hidden">
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
                 <input type="file" id="relation-file" style="display: none" />
-                <input type="button" class="btn btn-info" value="Customized relation set"
+                <input type="button" class="btn btn-info" value="自定义标签"
                        id="fakeBrowse" onclick="HandleBrowseClick();" hidden="true" style="visibility:hidden"/>
             </div>
         </div>
@@ -223,13 +264,10 @@
                   $('#parent' + second.toString())[0].textContent = first.toString();
                   var id1 = 'parent' + first.toString();
                   var id2 = 'parent' + second.toString();
-                  if (operations.length > 0 && operations[operations.length - 1]['type'] === 'click') {
-                      operations.splice(operations.length - 1, 1);
-                  }
-                  var op = {'type': 'connect', 'id1': first.toString(), 'id2': second.toString()};
-                  operations.push(op);
                   drawCurve(id1, id2, 'red');
                   addRelation(id1, id2, rel);
+                  var op = {'type': 'connect', 'id1': first.toString(), 'id2': second.toString()};
+                  operations.push(op);
                   depRel[second] = rel;
                   first = -1; second = -1;
                   updateProgress();
@@ -290,6 +328,9 @@
                 ctx.fillText(relation, 0, centerZ.y);
             }
             function drawCurve(id1, id2, color) {
+                while (operations.length > 0 && operations[operations.length - 1]['type'] === 'click') {
+                    operations.splice(operations.length - 1, 1);
+                }
                 var centerX = findPos(document.getElementById(id1));
                 centerX.x += document.getElementById(id1).style.width;
                 centerX.y += document.getElementById(id1).style.height;
@@ -344,13 +385,17 @@
                 for (var i = 0; i < fa.length; ++i) {
                     var father = 'null';
                     if (fa[i] >= 0) father = fa[i].toString();
+                    var displayText = edus[i];
+                    if (displayText.length > MAX_N) {
+                        displayText = displayText.substr(0, MAX_N);
+                    }
                     res += '<div class="col-lg-12 col-md-12 col-sm-12">'
                              + '<span class="label label-info" id="parent' + i.toString()
                              + '">' + father + '</span>'
                              + '<button id="edu' + i.toString()
                              + '" type="button" onclick="sendReq(\'edu' + i.toString() + '\')"'
                              + ' class="btn btn-default" style="background-color: white">'
-                             + '<h5>' + edus[i] + '</h5>'
+                             + '<h5>' + displayText + '</h5>'
                              + '</button>'
                              + '</div><br><br><br>';
                 }
@@ -370,20 +415,20 @@
                              + '<span class="label label-info" id="parent0">null</span>'
                              + '<button id="edu0" onclick="sendReq(\'edu0\')"'
                              + ' type="button" class="btn btn-default" style="background-color: white">'
-                             + '<h5>ROOT</h5>'
+                             + '<h6>ROOT</h6>'
                              + '</button>'
                              + '</div><br><br><br>';
                 fa = [-1]; delRel = ['null'];
                 edus = ['ROOT'];
-                var MAX_N = 150;
                 for (var i = contents.length - 1; i >= 0; --i) {
                     if (contents[i].length === 0) {
                         contents.splice(i, 1);
                     }
                 }
                 for (var i = 0; i < contents.length; i++) {
-                    if (contents[i].length > MAX_N) {
-                        contents[i] = contents[i].substr(0, MAX_N);
+                    var displayText = contents[i];
+                    if (displayText.length > MAX_N) {
+                        displayText = displayText.substr(0, MAX_N);
                     }
                     res += '<div class="col-lg-12 col-md-12 col-sm-12">'
                              + '<span class="label label-info" id="parent' + (i + 1).toString()
@@ -391,7 +436,7 @@
                              + '<button id="edu' + (i + 1).toString()
                              + '" type="button" onclick="sendReq(\'edu' + (i + 1).toString() + '\')"'
                              + ' class="btn btn-default" style="background-color: white">'
-                             + '<h5>' + contents[i] + '</h5>'
+                             + '<h5>' + displayText + '</h5>'
                              + '</button>'
                              + '</div><br><br><br>';
                      fa.push(-1); depRel.push('null');
@@ -407,6 +452,9 @@
                   arr[i].style.visibility = "visible";
               }
               var files = evt.target.files;
+              if (!files || !files[0]) { // user cancel selection
+                  return;
+              }
               inputFile = files[0];
               var reader = new FileReader();
               if (endsWith(inputFile.name, '.dep')) {
@@ -427,7 +475,11 @@
             document.getElementById('relation-file').addEventListener('change', Handlechange, false);
 
             function addLabel() {
-                var label = prompt('New relation:').toString().toLowerCase();
+                var label = prompt('New relation:');
+                if (!label) {
+                    return;
+                }
+                label = label.trim().toLowerCase();
                 if (label.length === 0) {
                     alert('ERROR: Can not be empty');
                     return;
@@ -436,7 +488,7 @@
                     alert('ERROR: Relation ' + label + ' already exists.');
                     return;
                 }
-                relations.push(label);
+                relations.unshift(label);
                 alert('SUCCESSFULLY added new relation ' + label);
             }
 
