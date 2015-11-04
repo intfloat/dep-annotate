@@ -48,6 +48,12 @@
                              'explanation', 'joint', 'manner-means',
                              'summary', 'temporal', 'topic-change',
                              'topic-comment', 'same-unit', 'textual'];
+            function getParent(idx) {
+                if (fa[idx] === -1) {
+                    return idx;
+                }
+                return getParent(fa[idx]);
+            }
             function sendReq(id) {
                 var index = parseInt(id.toString().substr(3));
                 if (first === -1) {
@@ -55,8 +61,9 @@
                     document.getElementById(id).setAttribute('style', 'background-color: green');
                     var op = {'type': 'click', 'index': index};
                     operations.push(op);
+                    var parentIdx = getParent(first);
                     for (var i = 0; i < fa.length; ++i) {
-                        if (fa[i] >= 0 || i === first) {
+                        if (fa[i] >= 0 || i === first || i === parentIdx || i === 0) {
                             $('#edu' + i.toString()).prop('disabled', true);
                         }
                     }
