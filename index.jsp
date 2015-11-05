@@ -42,6 +42,7 @@
             var MAX_N = 150;
             var fa = [], edus = [], operations = [], depRel = [];
             var inputFile = '', rel = '';
+            var blinkColor = '#00ffff';
             var relations = ['attribution', 'background', 'cause',
                              'comparison', 'condition', 'contrast',
                              'elaboration', 'enablement', 'evaluation',
@@ -58,6 +59,7 @@
                 var index = parseInt(id.toString().substr(3));
                 if (first === -1) {
                     first = index;
+                    mouseOutHandler(first);
                     document.getElementById(id).setAttribute('style', 'background-color: green');
                     var op = {'type': 'click', 'index': index};
                     operations.push(op);
@@ -183,7 +185,7 @@
     </head>
     <body id="body">
         <div class="picture">
-        <canvas id="canvas" height="4500" width="1500"></canvas>
+        <canvas id="canvas" height="700" width="1500"></canvas>
         <%
             for (int i = 0; i < 3; ++i) {
                 out.println("<br>");
@@ -225,6 +227,13 @@
         <br>
         <div class="container blob2" id="list">
         </div>
+        <footer class="footer" align="center">
+            <div class="container">
+                <p class="text-muted">
+                    如果碰到任何问题，或者有改进建议，请给我<a href="mailto:wangliangpeking@gmail.com">发邮件</a>，谢谢。
+                </p>
+            </div>
+        </footer>
         <div id="dialog-form" title="Add a relation" hidden="true">
           <form>
                  <select class="form-control" id="select" name="select" >
@@ -335,41 +344,44 @@
                 ctx.fillText(relation, 0, centerZ.y);
             }
             function drawCurve(id1, id2, color) {
+                // this piece of code is a terrible design, need to get rid of it later.
                 while (operations.length > 0 && operations[operations.length - 1]['type'] === 'click') {
                     operations.splice(operations.length - 1, 1);
                 }
-                var centerX = findPos(document.getElementById(id1));
-                centerX.x += document.getElementById(id1).style.width;
-                centerX.y += document.getElementById(id1).style.height;
-                var centerZ = findPos(document.getElementById(id2));
-                centerZ.x += document.getElementById(id2).style.width;
-                centerZ.y += document.getElementById(id2).style.height;
+                var centerS = findPos(document.getElementById(id1));
+                centerS.x += document.getElementById(id1).style.width;
+                centerS.y += document.getElementById(id1).style.height;
+                var centerT = findPos(document.getElementById(id2));
+                centerT.x += document.getElementById(id2).style.width;
+                centerT.y += document.getElementById(id2).style.height;
                 var canvasPos = findPos(document.getElementById('canvas'));
-                centerX.x -= canvasPos.x;
-                centerX.y -= canvasPos.y;
-                centerZ.x -= canvasPos.x;
-                centerZ.y -= canvasPos.y;
-                centerX.y += 5; centerZ.y += 5;
+                centerS.x -= canvasPos.x;
+                centerS.y -= canvasPos.y;
+                centerT.x -= canvasPos.x;
+                centerT.y -= canvasPos.y;
+                centerS.y += 15;
+                centerT.y += 5;
                 var width = findPos(document.getElementById(id1)).x;
                 var percent = 1 - Math.abs(getTrimNumber(id1) - getTrimNumber(id2)) / (fa.length - 1);
                 if (edus.length > 30 && percent > 0.5) {
                     percent = percent - 0.5;
                 }
+                percent = Math.min(percent, 0.85);
                 var offX = width * percent;
                 var ctx = document.getElementById('canvas').getContext('2d');
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(centerX.x, centerX.y);
-                ctx.bezierCurveTo(offX, centerX.y, offX, centerZ.y, centerZ.x, centerZ.y);
+                ctx.moveTo(centerS.x, centerS.y);
+                ctx.bezierCurveTo(offX, centerS.y, offX, centerT.y, centerT.x, centerT.y);
                 ctx.stroke();
 
                 ctx.beginPath();
-                var radius = 5;
+                var radius = 6;
                 ctx.fillStyle = color;
-                ctx.moveTo(centerZ.x - radius, centerZ.y - radius);
-                ctx.lineTo(centerZ.x - radius, centerZ.y + radius);
-                ctx.lineTo(centerZ.x, centerZ.y);
+                ctx.moveTo(centerT.x - radius, centerT.y - radius);
+                ctx.lineTo(centerT.x - radius, centerT.y + radius);
+                ctx.lineTo(centerT.x, centerT.y);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -377,7 +389,40 @@
                 return str.indexOf(suffix, str.length - suffix.length) !== -1;
             }
             function updateCanvasHeight() {
-                document.getElementById('canvas').height = edus.length / 80 * 4500 + 1500;
+                document.getElementById('canvas').height = edus.length / 75 * 4500 + 100;
+            }
+            function mouseOverHandler(pos) {
+                if (pos < 0 || pos >= fa.length || fa[pos] < 0) {
+                    return;
+                }
+                document.getElementById('edu' + pos.toString()).setAttribute('style', 'background-color: ' + blinkColor);
+                document.getElementById('edu' + fa[pos].toString()).setAttribute('style', 'background-color: ' + blinkColor);
+                var ctx = document.getElementById('canvas').getContext('2d');
+                var canvas = document.getElementById('canvas');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (var i = 0; i < fa.length; ++i) {
+                    if (i === pos && fa[i] >= 0) {
+                        connect(fa[i], i, blinkColor, depRel[i]);
+                    }
+                    else if (fa[i] >= 0) {
+                        connect(fa[i], i, 'red', depRel[i]);
+                    }
+                }
+            }
+            function mouseOutHandler(pos) {
+                if (pos < 0 || pos >= fa.length || fa[pos] < 0) {
+                    return;
+                }
+                document.getElementById('edu' + pos.toString()).setAttribute('style', 'background-color: white');
+                document.getElementById('edu' + fa[pos].toString()).setAttribute('style', 'background-color: white');
+                var ctx = document.getElementById('canvas').getContext('2d');
+                var canvas = document.getElementById('canvas');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (var i = 0; i < fa.length; ++i) {
+                    if (fa[i] >= 0) {
+                        connect(fa[i], i, 'red', depRel[i]);
+                    }
+                }
             }
             function loadJsonData(e) {
                 var obj = JSON.parse(e.target.result);
@@ -401,6 +446,8 @@
                              + '">' + father + '</span>'
                              + '<button id="edu' + i.toString()
                              + '" type="button" onclick="sendReq(\'edu' + i.toString() + '\')"'
+                             + ' onmouseover="mouseOverHandler(' + i.toString() + ')"'
+                             + ' onmouseout="mouseOutHandler(' + i.toString() + ')"'
                              + ' class="btn btn-default" style="background-color: white">'
                              + '<h5>' + displayText + '</h5>'
                              + '</button>'
@@ -442,6 +489,8 @@
                              + '">null</span>'
                              + '<button id="edu' + (i + 1).toString()
                              + '" type="button" onclick="sendReq(\'edu' + (i + 1).toString() + '\')"'
+                             + ' onmouseover="mouseOverHandler(' + (i + 1).toString() + ')"'
+                             + ' onmouseout="mouseOutHandler(' + (i + 1).toString() + ')"'
                              + ' class="btn btn-default" style="background-color: white">'
                              + '<h5>' + displayText + '</h5>'
                              + '</button>'
