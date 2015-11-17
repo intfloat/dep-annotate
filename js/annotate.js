@@ -95,6 +95,7 @@ function undo() {
     else if (op['type'] === 'delete') {
         var id1 = op['id1'], id2 = op['id2'];
         fa[id2] = id1;
+        document.getElementById('parent' + id2).textContent = fa[id2].toString();
         depRel[id2] = op['relation'];
         connect(id1, id2, 'red', depRel[id2]);
     }
@@ -122,7 +123,6 @@ function connect(id1, id2, color, rel) {
 }
 
 function disconnect(id1, id2) {
-    document.getElementById('parent' + id1).textContent = 'null';
     document.getElementById('parent' + id2).textContent = 'null';
     fa[parseInt(id2)] = -1; depRel[parseInt(id2)] = 'null';
     var ctx = document.getElementById('canvas').getContext('2d');

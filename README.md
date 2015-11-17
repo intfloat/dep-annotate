@@ -16,6 +16,14 @@
 
 6.支持边的删除操作
 
+## 感谢以下开源项目
+
+[bootstrap](https://github.com/twbs/bootstrap)
+
+[jquery](https://github.com/jquery/jquery)
+
+[FileSaver.js](https://github.com/eligrey/FileSaver.js)
+
 ## 设计原则
 
 1.界面极简
