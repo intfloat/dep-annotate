@@ -71,7 +71,7 @@ function saveToFile() {
         data['root'].push(cur);
     }
     var outFileName = inputFile + '.dep';
-    var blob = new Blob([JSON.stringify(data)], {type: "text/plain;charset=utf-8"});
+    var blob = new Blob([JSON.stringify(data, null, '\t')], {type: "text/plain;charset=utf-8"});
     saveAs(blob, outFileName);
 }
 
