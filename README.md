@@ -1,6 +1,6 @@
 # 依存树标注工具
 
-![这里写图片描述](https://github.com/intfloat/dep-annotator/image/dep.jpg)
+![这里写图片描述](https://github.com/intfloat/dep-annotate/blob/master/image/dep.jpg)
 
 ## 已实现功能
 
@@ -22,10 +22,14 @@
 
 2.不依赖服务器端，100%运行在客户端
 
+## Live demo
+
+可以访问[http://115.28.130.129/annotator](http://115.28.130.129/annotator)
+
 ## 注意事项
 
 1.文件编码仅支持utf-8，非utf-8请先用iconv转化。
 
 ## bug报告或改进建议
 
-请在issue页指出，谢谢。
+请在[issue](https://github.com/intfloat/dep-annotate/issues)页指出，谢谢。
