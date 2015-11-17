@@ -1,0 +1,101 @@
+<!--
+    Document   : index.html
+    Created on : 2015-10-6, 23:38:01
+    Author     : Liang Wang
+-->
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Dependency Tree Annotate Tool</title>
+        <script src="./js/jquery-1.11.3.min.js"></script>
+        <script src="./js/bootstrap.min.js"></script>
+        <script src="./js/jquery-ui.min.js"></script>
+        <script src="./js/FileSaver.min.js"></script>        
+        <link href="./css/bootstrap.min.css" rel="stylesheet">
+        <link href="./css/jquery-ui.min.css" rel="stylesheet">
+        <link href="./css/jquery-ui.structure.min.css" rel="stylesheet">
+        <link href="./css/jquery-ui.theme.min.css" rel="stylesheet">
+        <style media="screen" type="text/css">
+            .picture {
+                position: relative;
+            }
+            .mybar, .blob1, .blob2 {
+                position: absolute;
+                left: 150px;
+            }
+            .blob1 {
+                top: 30px;
+            }
+            .mybar {
+                top: 70px;
+            }
+            .blob2 {
+                top: 110px;
+            }
+        </style>
+    </head>
+    <body id="body">
+        <div class="picture">
+        <canvas id="canvas" height="700" width="1500"></canvas>
+        <br><br><br>
+        <div class="container blob1">
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <input type="file" id="files" name="files[]" multiple />
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="保存" onclick="saveToFile()" style="visibility:hidden">
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="撤销" onclick="undo()" hidden="true" style="visibility:hidden">
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="删除边" onclick="deleteEdge()" hidden="true" style="visibility:hidden">
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="加标签" onclick="addLabel()" hidden="true" style="visibility:hidden">
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="button" class="btn btn-info" value="删标签" onclick="deleteLabel()" hidden="true" style="visibility:hidden">
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <input type="file" id="relation-file" style="display: none" />
+                <input type="button" class="btn btn-info" value="自定义标签"
+                       id="fakeBrowse" onclick="HandleBrowseClick();" hidden="true" style="visibility:hidden"/>
+            </div>
+        </div>
+
+        <div class="container mybar">
+              <div class="progress">
+                <div id="progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                </div>
+              </div>
+        </div>
+        <br>
+
+        <div class="container blob2" id="list">
+        </div>
+        <footer class="footer" align="center">
+            <div class="container">
+                <p class="text-muted">
+                    如果碰到任何问题，或者有改进建议，请给我<a href="mailto:wangliangpeking@gmail.com">发邮件</a>，谢谢。
+                </p>
+                <p class="text-muted">最近更新日期：2015 / 11 / 5</p>
+            </div>
+        </footer>
+        <div id="dialog-form" title="Add a relation" hidden="true">
+          <form>
+                 <select class="form-control" id="select" name="select" >
+                 </select>
+          </form>
+        </div>
+
+        <div id="new-relation-dialog" title="Click to remove relations">
+          <form>
+                 <ul class="list-group" id="relation-list">
+                </ul>
+          </form>
+        </div>
+    </body>
+    <script src="./js/annotate.js"></script>
+</html>
