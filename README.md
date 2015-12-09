@@ -1,6 +1,6 @@
 # 依存树标注工具
 
-![这里写图片描述](https://github.com/intfloat/dep-annotate/blob/master/image/dep.jpg)
+![这里写图片描述](image/dep.jpg)
 
 ## 已实现功能
 
