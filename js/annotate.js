@@ -25,7 +25,7 @@ function sendReq(id) {
         first = index;
         mouseOutHandler(first);
         document.getElementById(id).setAttribute('style', 'background-color: green');
-        var op = {'type': 'click', 'index': index};
+        var op = {type: 'click', index: index};
         operations.push(op);
         var parentIdx = getParent(first);
         for (var i = 0; i < fa.length; ++i) {
@@ -45,7 +45,7 @@ function sendReq(id) {
     }
     second = index;
     popRelation();
-};
+}
 
 function updateProgress() {
     var total = fa.length - 1;
@@ -65,10 +65,10 @@ function saveToFile() {
         alert('Invalid input file!');
         return;
     }
-    var data = {'root': []};
+    var data = {root: []};
     for (var i = 0; i < fa.length; ++i) {
-        var cur = {'parent': fa[i], 'text': edus[i], 'relation': depRel[i]};
-        data['root'].push(cur);
+        var cur = {parent: fa[i], text: edus[i], relation: depRel[i]};
+        data.root.push(cur);
     }
     var outFileName = inputFile + '.dep';
     var blob = new Blob([JSON.stringify(data, null, '\t')], {type: "text/plain;charset=utf-8"});
@@ -85,18 +85,18 @@ function undo() {
         return;
     }
     var op = operations[operations.length - 1];
-    if (op['type'] === 'click') {
+    if (op.type === 'click') {
         recoverClickNode();
     }
-    else if (op['type'] === 'connect') {
-        var id1 = op['id1'], id2 = op['id2'];
+    else if (op.type === 'connect') {
+        var id1 = op.id1, id2 = op.id2;
         disconnect(id1, id2);
     }
-    else if (op['type'] === 'delete') {
-        var id1 = op['id1'], id2 = op['id2'];
+    else if (op.type === 'delete') {
+        var id1 = op.id1, id2 = op.id2;
         fa[id2] = id1;
         document.getElementById('parent' + id2).textContent = fa[id2].toString();
-        depRel[id2] = op['relation'];
+        depRel[id2] = op.relation;
         connect(id1, id2, 'red', depRel[id2]);
     }
     operations.splice(operations.length - 1, 1);
@@ -118,7 +118,7 @@ function recoverClickNode() {
 
 function connect(id1, id2, color, rel) {
     drawCurve('parent' + id1, 'parent' + id2, color);
-    addRelation('parent' + id1, 'parent' + id2, rel);
+    addRelation('parent' + id2, rel);
     updateProgress();
 }
 
@@ -147,7 +147,7 @@ function deleteEdge() {
         return;
     }
     var id1 = fa[first], id2 = first;
-    var op = {'type': 'delete', 'id1': id1, 'id2': id2, 'relation': depRel[id2]};
+    var op = {type: 'delete', id1: id1, id2: id2, relation: depRel[id2]};
     recoverClickNode(first);
     disconnect(id1, id2);
     operations.push(op);
@@ -186,8 +186,8 @@ function popRelation() {
         var id1 = 'parent' + first.toString();
         var id2 = 'parent' + second.toString();
         drawCurve(id1, id2, 'red');
-        addRelation(id1, id2, rel);
-        var op = {'type': 'connect', 'id1': first.toString(), 'id2': second.toString()};
+        addRelation(id2, rel);
+        var op = {type: 'connect', id1: first.toString(), id2: second.toString()};
         operations.push(op);
         depRel[second] = rel;
         first = -1; second = -1;
@@ -199,7 +199,7 @@ function popRelation() {
         width: 450,
         modal: true,
         buttons: {
-          "OK": relationCallback
+          OK: relationCallback
         }
     });
     var res = '';
@@ -209,15 +209,16 @@ function popRelation() {
     $('#select').html(res);
     rel = '';
     dialog.dialog("open");
-};
+}
 
 function findPos(obj) {
-    var curLeft = curTop = 0;
+    var curLeft = 0, curTop = 0;
     if (obj.offsetParent) {
         do {
-                curLeft += obj.offsetLeft;
-                curTop += obj.offsetTop;
-        } while (obj = obj.offsetParent);
+            curLeft += obj.offsetLeft;
+            curTop += obj.offsetTop;
+            obj = obj.offsetParent;
+        } while (obj);
     }
     return {x:curLeft, y:curTop};
 }
@@ -230,12 +231,11 @@ function getTrimNumber(s) {
     return parseInt(s.substr(i + 1));
 }
 
-function addRelation(id1, id2, relation) {
+function addRelation(id2, relation) {
     if (relation.length === 0) {
         alert('Invalid relation');
         return;
-    }
-    id1;
+    }    
     var centerZ = findPos(document.getElementById(id2));
     centerZ.x += document.getElementById(id2).style.width;
     centerZ.y += document.getElementById(id2).style.height;
@@ -252,7 +252,7 @@ function addRelation(id1, id2, relation) {
 
 function drawCurve(id1, id2, color) {
     // this piece of code is a terrible design, need to get rid of it later.
-    while (operations.length > 0 && operations[operations.length - 1]['type'] === 'click') {
+    while (operations.length > 0 && operations[operations.length - 1].type === 'click') {
         operations.splice(operations.length - 1, 1);
     }
     var centerS = findPos(document.getElementById(id1));
@@ -339,11 +339,11 @@ function mouseOutHandler(pos) {
 function loadJsonData(e) {
     var obj = JSON.parse(e.target.result);
     fa = []; edus = []; depRel = [];
-    obj = obj['root'];
+    obj = obj.root;
     for (var i = 0; i < obj.length; ++i) {
-        fa[i] = obj[i]['parent'];
-        edus[i] = obj[i]['text'];
-        depRel[i] = obj[i]['relation'];
+        fa[i] = obj[i].parent;
+        edus[i] = obj[i].text;
+        depRel[i] = obj[i].relation;
     }
     var res = '';
     for (var i = 0; i < fa.length; ++i) {
@@ -353,24 +353,24 @@ function loadJsonData(e) {
         if (displayText.length > MAX_N) {
             displayText = displayText.substr(0, MAX_N);
         }
-        res += '<div class="col-lg-12 col-md-12 col-sm-12">'
-                 + '<span class="label label-info" id="parent' + i.toString()
-                 + '">' + father + '</span>'
-                 + '<button id="edu' + i.toString()
-                 + '" type="button" onclick="sendReq(\'edu' + i.toString() + '\')"'
-                 + ' onmouseover="mouseOverHandler(' + i.toString() + ')"'
-                 + ' onmouseout="mouseOutHandler(' + i.toString() + ')"'
-                 + ' class="btn btn-default" style="background-color: white">'
-                 + '<h5>' + displayText + '</h5>'
-                 + '</button>'
-                 + '</div><br><br><br>';
+        res += '<div class="col-lg-12 col-md-12 col-sm-12">' +
+                 '<span class="label label-info" id="parent' + i.toString() +
+                 '">' + father + '</span>' +
+                 '<button id="edu' + i.toString() +
+                 '" type="button" onclick="sendReq(\'edu' + i.toString() + '\')"' +
+                 ' onmouseover="mouseOverHandler(' + i.toString() + ')"' +
+                 ' onmouseout="mouseOutHandler(' + i.toString() + ')"' +
+                 ' class="btn btn-default" style="background-color: white">' +
+                 '<h5>' + displayText + '</h5>' +
+                 '</button>' +
+                 '</div><br><br><br>';
     }
     updateCanvasHeight();
     $('#list').html(res);
     for (var i = 0; i < fa.length; ++i) {
         if (fa[i] >= 0) {
             drawCurve('parent' + fa[i].toString(), 'parent' + i.toString(), 'red');
-            addRelation('parent' + fa[i].toString(), 'parent' + i.toString(), depRel[i]);
+            addRelation('parent' + i.toString(), depRel[i]);
         }
     }
     updateProgress();
@@ -378,13 +378,13 @@ function loadJsonData(e) {
 
 function loadRawData(e) {
     var contents = e.target.result.split('\n');
-    var res = '<div class="col-lg-12 col-md-12 col-sm-12">'
-                 + '<span class="label label-info" id="parent0">null</span>'
-                 + '<button id="edu0" onclick="sendReq(\'edu0\')"'
-                 + ' type="button" class="btn btn-default" style="background-color: white">'
-                 + '<h6>ROOT</h6>'
-                 + '</button>'
-                 + '</div><br><br><br>';
+    var res = '<div class="col-lg-12 col-md-12 col-sm-12">' +
+                 '<span class="label label-info" id="parent0">null</span>' +
+                 '<button id="edu0" onclick="sendReq(\'edu0\')"' +
+                 ' type="button" class="btn btn-default" style="background-color: white">' +
+                 '<h6>ROOT</h6>' +
+                 '</button>' +
+                 '</div><br><br><br>';
     fa = [-1]; delRel = ['null'];
     edus = ['ROOT'];
     for (var i = contents.length - 1; i >= 0; --i) {
@@ -397,17 +397,17 @@ function loadRawData(e) {
         if (displayText.length > MAX_N) {
             displayText = displayText.substr(0, MAX_N);
         }
-        res += '<div class="col-lg-12 col-md-12 col-sm-12">'
-                 + '<span class="label label-info" id="parent' + (i + 1).toString()
-                 + '">null</span>'
-                 + '<button id="edu' + (i + 1).toString()
-                 + '" type="button" onclick="sendReq(\'edu' + (i + 1).toString() + '\')"'
-                 + ' onmouseover="mouseOverHandler(' + (i + 1).toString() + ')"'
-                 + ' onmouseout="mouseOutHandler(' + (i + 1).toString() + ')"'
-                 + ' class="btn btn-default" style="background-color: white">'
-                 + '<h5>' + displayText + '</h5>'
-                 + '</button>'
-                 + '</div><br><br><br>';
+        res += '<div class="col-lg-12 col-md-12 col-sm-12">' +
+                 '<span class="label label-info" id="parent' + (i + 1).toString() +
+                 '">null</span>' +
+                 '<button id="edu' + (i + 1).toString() +
+                 '" type="button" onclick="sendReq(\'edu' + (i + 1).toString() + '\')"' +
+                 ' onmouseover="mouseOverHandler(' + (i + 1).toString() + ')"' +
+                 ' onmouseout="mouseOutHandler(' + (i + 1).toString() + ')"' +
+                 ' class="btn btn-default" style="background-color: white">' +
+                 '<h5>' + displayText + '</h5>' +
+                 '</button>' +
+                 '</div><br><br><br>';
          fa.push(-1); depRel.push('null');
          edus.push(contents[i]);
     }
@@ -440,7 +440,7 @@ function handleFileSelect(evt) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   operations = [];
   first = second = -1;
-};
+}
 
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('relation-file').addEventListener('change', Handlechange, false);
@@ -471,13 +471,13 @@ function deleteLabel() {
         width: 350,
         modal: true,
         buttons: {
-            'OK': nullCallback
+            OK: nullCallback
         }
     });
     var res = '';
     for (var i = 0; i < relations.length; ++i) {
-        res += '<li class="list-group-item">' + relations[i]
-                + '<img src="./css/images/remove.jpeg" style="width:20px;height:20px;" align="right"></li>';
+        res += '<li class="list-group-item">' + relations[i] +
+                '<img src="./css/images/remove.jpeg" style="width:20px;height:20px;" align="right"></li>';
     }
     $('#relation-list').html(res);
     $(".list-group-item").on("click", function(){
