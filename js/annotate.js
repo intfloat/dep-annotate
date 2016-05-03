@@ -89,8 +89,7 @@ function undo() {
         recoverClickNode();
     }
     else if (op.type === 'connect') {
-        var id1 = op.id1, id2 = op.id2;
-        disconnect(id1, id2);
+        disconnect(op.id1, op.id2);
     }
     else if (op.type === 'delete') {
         var id1 = op.id1, id2 = op.id2;
@@ -235,7 +234,7 @@ function addRelation(id2, relation) {
     if (relation.length === 0) {
         alert('Invalid relation');
         return;
-    }    
+    }
     var centerZ = findPos(document.getElementById(id2));
     centerZ.x += document.getElementById(id2).style.width;
     centerZ.y += document.getElementById(id2).style.height;
@@ -329,24 +328,25 @@ function mouseOutHandler(pos) {
     var ctx = document.getElementById('canvas').getContext('2d');
     var canvas = document.getElementById('canvas');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0; i < fa.length; ++i) {
-        if (fa[i] >= 0) {
-            connect(fa[i], i, 'red', depRel[i]);
+    _.each(fa, function(e, i) {
+        if (e >= 0) {
+            connect(e, i, 'red', depRel[i]);
         }
-    }
+    });
 }
 
 function loadJsonData(e) {
     var obj = JSON.parse(e.target.result);
+    var i = 0;
     fa = []; edus = []; depRel = [];
     obj = obj.root;
-    for (var i = 0; i < obj.length; ++i) {
+    for (i = 0; i < obj.length; ++i) {
         fa[i] = obj[i].parent;
         edus[i] = obj[i].text;
         depRel[i] = obj[i].relation;
     }
     var res = '';
-    for (var i = 0; i < fa.length; ++i) {
+    for (i = 0; i < fa.length; ++i) {
         var father = 'null';
         if (fa[i] >= 0) father = fa[i].toString();
         var displayText = edus[i];
@@ -367,7 +367,7 @@ function loadJsonData(e) {
     }
     updateCanvasHeight();
     $('#list').html(res);
-    for (var i = 0; i < fa.length; ++i) {
+    for (i = 0; i < fa.length; ++i) {
         if (fa[i] >= 0) {
             drawCurve('parent' + fa[i].toString(), 'parent' + i.toString(), 'red');
             addRelation('parent' + i.toString(), depRel[i]);
@@ -387,12 +387,13 @@ function loadRawData(e) {
                  '</div><br><br><br>';
     fa = [-1]; delRel = ['null'];
     edus = ['ROOT'];
-    for (var i = contents.length - 1; i >= 0; --i) {
+    var i = 0;
+    for (i = contents.length - 1; i >= 0; --i) {
         if (contents[i].length === 0) {
             contents.splice(i, 1);
         }
     }
-    for (var i = 0; i < contents.length; i++) {
+    for (i = 0; i < contents.length; i++) {
         var displayText = contents[i];
         if (displayText.length > MAX_N) {
             displayText = displayText.substr(0, MAX_N);
