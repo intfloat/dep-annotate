@@ -11,7 +11,8 @@
         <script src="./js/jquery-1.11.3.min.js"></script>
         <script src="./js/bootstrap.min.js"></script>
         <script src="./js/jquery-ui.min.js"></script>
-        <script src="./js/FileSaver.min.js"></script>        
+        <script src="./js/FileSaver.min.js"></script>
+        <script src="./js/angular.min.js"></script>
         <link href="./css/bootstrap.min.css" rel="stylesheet">
         <link href="./css/jquery-ui.min.css" rel="stylesheet">
         <link href="./css/jquery-ui.structure.min.css" rel="stylesheet">
@@ -35,8 +36,7 @@
             }
         </style>
     </head>
-    <body id="body">
-        <div class="picture">
+    <body id="body" ng-app="">
         <canvas id="canvas" height="700" width="1500"></canvas>
         <br><br><br>
         <div class="container blob1">
@@ -79,14 +79,10 @@
 
         <div class="container blob2" id="list">
         </div>
-        <footer class="footer" align="center">
-            <div class="container">
-                <p class="text-muted">
-                    如果碰到任何问题，或者有改进建议，请给我<a href="mailto:wangliangpeking@gmail.com">发邮件</a>，谢谢。
-                </p>
-                <p class="text-muted">最近更新日期：2015 / 12 / 1</p>
-            </div>
-        </footer>
+
+        <!-- include footer page -->
+        <div ng-include="'template/footer.html'"></div>
+
         <div id="dialog-form" title="Add a relation" hidden="true">
           <form>
                  <select class="form-control" id="select" name="select" >
