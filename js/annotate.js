@@ -1,3 +1,4 @@
+'use strict';
 
 var first = -1;
 var second = -1;
@@ -57,7 +58,6 @@ function updateProgress() {
     var percent = labeled * 100 / total;
     var bar = document.getElementById('progress');
     bar.setAttribute('style', 'width: ' + percent.toString() + '%');
-    return;
 }
 
 function saveToFile() {
@@ -100,7 +100,6 @@ function undo() {
     }
     operations.splice(operations.length - 1, 1);
     updateProgress();
-    return;
 }
 
 function recoverClickNode() {
@@ -337,7 +336,7 @@ function mouseOutHandler(pos) {
 
 function loadJsonData(e) {
     var obj = JSON.parse(e.target.result);
-    var i = 0;
+    var i;
     fa = []; edus = []; depRel = [];
     obj = obj.root;
     for (i = 0; i < obj.length; ++i) {
@@ -385,9 +384,10 @@ function loadRawData(e) {
                  '<h6>ROOT</h6>' +
                  '</button>' +
                  '</div><br><br><br>';
-    fa = [-1]; delRel = ['null'];
+    fa = [-1];
+    depRel = ['null'];
     edus = ['ROOT'];
-    var i = 0;
+    var i;
     for (i = contents.length - 1; i >= 0; --i) {
         if (contents[i].length === 0) {
             contents.splice(i, 1);
@@ -409,8 +409,9 @@ function loadRawData(e) {
                  '<h5>' + displayText + '</h5>' +
                  '</button>' +
                  '</div><br><br><br>';
-         fa.push(-1); depRel.push('null');
-         edus.push(contents[i]);
+        fa.push(-1);
+        depRel.push('null');
+        edus.push(contents[i]);
     }
     updateCanvasHeight();
     $('#list').html(res);

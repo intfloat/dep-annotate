@@ -24,6 +24,10 @@
 
 [FileSaver.js](https://github.com/eligrey/FileSaver.js)
 
+[Angular](https://github.com/angular/angular)
+
+[Underscore.js](https://github.com/jashkenas/underscore)
+
 ## 设计原则
 
 1.界面极简
