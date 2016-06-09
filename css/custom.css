@@ -1,0 +1,13 @@
+.progress-bar-container, .menu-bar, .edu-list {
+    position: absolute;
+    left: 150px;
+}
+.progress-bar-container {
+    top: 70px;
+}
+.menu-bar {
+    top: 30px;
+}
+.edu-list {
+    top: 110px;
+}

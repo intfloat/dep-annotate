@@ -218,7 +218,7 @@ function findPos(obj) {
             obj = obj.offsetParent;
         } while (obj);
     }
-    return {x:curLeft, y:curTop};
+    return {x: curLeft, y: curTop};
 }
 
 function getTrimNumber(s) {

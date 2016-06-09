@@ -12,58 +12,44 @@
         <link href="./css/jquery-ui.min.css" rel="stylesheet">
         <link href="./css/jquery-ui.structure.min.css" rel="stylesheet">
         <link href="./css/jquery-ui.theme.min.css" rel="stylesheet">
-        <style media="screen" type="text/css">
-            .mybar, .blob1, .blob2 {
-                position: absolute;
-                left: 150px;
-            }
-            .blob1 {
-                top: 30px;
-            }
-            .mybar {
-                top: 70px;
-            }
-            .blob2 {
-                top: 110px;
-            }
-        </style>
+        <link href="./css/custom.css" rel="stylesheet">
     </head>
     <body id="body" ng-app="">
         <canvas id="canvas" height="700" width="1500"></canvas>
         <br><br><br>
-        <div class="container blob1">
-            <div class="col-lg-2 col-md-2 col-sm-2">
+        <div class="container menu-bar">
+            <div class="col-sm-2">
                 <input type="file" id="files" name="files[]" multiple />
             </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
+            <div class="col-sm-1">
                 <input type="button" class="btn btn-info" value="保存" onclick="saveToFile()" style="visibility:hidden">
             </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
+            <div class="col-sm-1">
                 <input type="button" class="btn btn-info" value="撤销" onclick="undo()"
                        style="visibility:hidden">
             </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
+            <div class="col-sm-1">
                 <input type="button" class="btn btn-info" value="删除边" onclick="deleteEdge()"
                        style="visibility:hidden">
             </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
+            <div class="col-sm-1">
                 <input type="button" class="btn btn-info" value="加标签" onclick="addLabel()" style="visibility:hidden">
             </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
+            <div class="col-sm-1">
                 <input type="button" class="btn btn-info" value="删标签" onclick="deleteLabel()" style="visibility:hidden">
             </div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
+            <div class="col-sm-1">
                 <input type="file" id="relation-file" style="display: none" />
                 <input type="button" class="btn btn-info" value="自定义标签"
                        id="fakeBrowse" onclick="HandleBrowseClick();" style="visibility:hidden"/>
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2"></div>
-            <div class="col-lg-1 col-md-1 col-sm-1">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-1">
                 <h5><a href="./doc/help.html" target="_blank">使用说明</a></h5>
             </div>
         </div>
 
-        <div class="container mybar">
+        <div class="container progress-bar-container">
               <div class="progress">
                 <div id="progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
                 </div>
@@ -71,7 +57,7 @@
         </div>
         <br>
 
-        <div class="container blob2" id="list">
+        <div class="container edu-list" id="list">
         </div>
 
         <!-- include footer page -->
