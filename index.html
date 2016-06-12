@@ -8,40 +8,42 @@
         <script src="./js/FileSaver.min.js"></script>
         <script src="./js/angular.min.js"></script>
         <script src="./js/underscore-min.js"></script>
+        <script src="./js/ng-file-upload.min.js"></script>
         <link href="./css/bootstrap.min.css" rel="stylesheet">
         <link href="./css/jquery-ui.min.css" rel="stylesheet">
         <link href="./css/jquery-ui.structure.min.css" rel="stylesheet">
         <link href="./css/jquery-ui.theme.min.css" rel="stylesheet">
         <link href="./css/custom.css" rel="stylesheet">
+        <script src="./annotate.js"></script>
     </head>
-    <body id="body" ng-app="">
-        <canvas id="canvas" height="700" width="1500"></canvas>
-        <br><br><br>
+    <body id="body" ng-app="DepAnnotate" ng-controller="EDUListController">
+        <canvas id="canvas" height="{{canvas_height}}" width="{{canvas_width}}"></canvas>
+        <br ng-repeat="i in _.range(3)">
         <div class="container menu-bar">
             <div class="col-sm-2">
-                <input type="file" id="files" name="files[]" multiple />
+                <input type="file" ngf-select="handleFileSelect($files)" name="files[]" multiple />
             </div>
             <div class="col-sm-1">
-                <input type="button" class="btn btn-info" value="保存" onclick="saveToFile()" style="visibility:hidden">
+                <input type="button" class="btn btn-info" value="保存" ng-click="saveToFile()"
+                       ng-show="!!inputFile">
             </div>
             <div class="col-sm-1">
-                <input type="button" class="btn btn-info" value="撤销" onclick="undo()"
-                       style="visibility:hidden">
+                <input type="button" class="btn btn-info" value="撤销" ng-click="undo()"
+                       ng-show="!!inputFile" ng-disabled="operations.length === 0">
             </div>
             <div class="col-sm-1">
-                <input type="button" class="btn btn-info" value="删除边" onclick="deleteEdge()"
-                       style="visibility:hidden">
+                <input type="button" class="btn btn-info" value="删除边" ng-click="deleteEdge()" ng-show="!!inputFile">
             </div>
             <div class="col-sm-1">
-                <input type="button" class="btn btn-info" value="加标签" onclick="addLabel()" style="visibility:hidden">
+                <input type="button" class="btn btn-info" value="加标签" ng-click="addLabel()" ng-show="!!inputFile">
             </div>
             <div class="col-sm-1">
-                <input type="button" class="btn btn-info" value="删标签" onclick="deleteLabel()" style="visibility:hidden">
+                <input type="button" class="btn btn-info" value="删标签" ng-click="deleteLabel()" ng-show="!!inputFile">
             </div>
             <div class="col-sm-1">
-                <input type="file" id="relation-file" style="display: none" />
+                <input type="file" id="relation-file" ng-show="false" />
                 <input type="button" class="btn btn-info" value="自定义标签"
-                       id="fakeBrowse" onclick="HandleBrowseClick();" style="visibility:hidden"/>
+                       ng-click="handleBrowseClick()" ng-show="!!inputFile"/>
             </div>
             <div class="col-sm-2"></div>
             <div class="col-sm-1">
@@ -49,23 +51,42 @@
             </div>
         </div>
 
-        <div class="container progress-bar-container">
+        <div class="container progress-bar-container" ng-if="!!inputFile">
               <div class="progress">
-                <div id="progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                <div class="progress-bar" role="progressbar"
+                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                     ng-style="{'width': progress + '%'}">
                 </div>
               </div>
         </div>
         <br>
 
         <div class="container edu-list" id="list">
+            <div ng-repeat="displayText in edus track by $index">
+                <div class="col-sm-12">
+                    <span class="label label-info" id="parent{{$index}}">{{fa[$index] | TransformParent}}</span>
+                    <button id="edu{{$index}}" type="button" ng-click="highLight('edu' + ($index).toString())"
+                        ng-mouseover="mouseOverHandler($index)"
+                        ng-mouseleave="mouseOutHandler($index)"
+                        class="btn btn-default"
+                        ng-style="{'background-color': (first === $index) ? 'green' :
+                        ((mouseOverIndex >= 0 && fa[mouseOverIndex] >= 0 && ($index === mouseOverIndex || fa[mouseOverIndex] === $index)) ? blinkColor : 'white')}"
+                        ng-disabled="(first >= 0) && (fa[$index] >= 0 || $index === first || $index === getParent(first) || $index === 0)">
+                    <h5>{{displayText | TailorString}}</h5>
+                    </button>
+                </div>
+                <br><br><br>
+            </div>
         </div>
 
         <!-- include footer page -->
+        <br><br><br>
         <div ng-include="'template/footer.html'"></div>
 
-        <div id="dialog-form" title="Add a relation" hidden="true">
+        <div id="dialog-form" title="Add a relation" ng-show="showAddDialog">
           <form>
                  <select class="form-control" id="select" name="select" >
+                     <option ng-repeat="relation in relations">{{relation}}</option>
                  </select>
           </form>
         </div>
@@ -77,5 +98,4 @@
           </form>
         </div>
     </body>
-    <script src="./js/annotate.js"></script>
 </html>
