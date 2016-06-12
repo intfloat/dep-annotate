@@ -28,6 +28,8 @@
 
 [Underscore.js](https://github.com/jashkenas/underscore)
 
+[ng-file-upload](https://github.com/danialfarid/ng-file-upload)
+
 ## 设计原则
 
 1.界面极简
