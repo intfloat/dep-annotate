@@ -18,7 +18,6 @@
     </head>
     <body id="body" ng-app="DepAnnotate" ng-controller="EDUListController">
         <canvas id="canvas" height="{{canvas_height}}" width="{{canvas_width}}"></canvas>
-        <br ng-repeat="i in _.range(3)">
         <div class="container menu-bar">
             <div class="col-sm-2">
                 <input type="file" ngf-select="handleFileSelect($files)" name="files[]" multiple />
