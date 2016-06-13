@@ -26,7 +26,7 @@ app.filter('TailorString', ['CONSTANTS', function(CONSTANTS) {
            s = s.substr(0, CONSTANTS.MAX_N);
        }
        return s;
-   }
+   };
 }]);
 
 app.service('Utils', function() {
@@ -355,8 +355,8 @@ app.controller('EDUListController',
     };
 
     var disconnect = function(id1, id2) {
-        $scope.fa[parseInt(id2)] = -1;
-        $scope.depRel[parseInt(id2)] = 'null';
+        $scope.fa[id2] = -1;
+        $scope.depRel[id2] = 'null';
         var canvas = angular.element('#canvas')[0];
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, $scope.canvas_width, $scope.canvas_height);
