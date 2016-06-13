@@ -195,32 +195,30 @@ app.controller('EDUListController',
         $scope.operations.push(op);
     };
 
-    $scope.deleteLabel = function () {
-        var nullCallback = function() { dialog.dialog('close'); };
+    $scope.openDeleteDialog = false;
+    $scope.deleteLabel = function() {
         var dialog = $('#new-relation-dialog').dialog({
             autoOpen: false,
             height: 600,
             width: 350,
             modal: true,
             buttons: {
-                OK: nullCallback
+                OK: function() {
+                    $scope.openDeleteDialog = false;
+                    $scope.$digest();
+                    dialog.dialog('close');
+                }
             }
         });
-        var res = '';
-        for (var i = 0; i < $scope.relations.length; ++i) {
-            res += '<li class="list-group-item">' + $scope.relations[i] +
-                '<img src="./css/images/remove.jpeg" style="width:20px;height:20px;" align="right"></li>';
-        }
-        $('#relation-list').html(res);
-        $(".list-group-item").on("click", function(){
-            var r = this.textContent.trim();
-            $(this).remove();
-            var pos = $scope.relations.indexOf(r);
-            if (pos >= 0) {
-                $scope.relations.splice(pos, 1);
-            }
-        });
+        $scope.openDeleteDialog = true;
         dialog.dialog('open');
+    };
+
+    $scope.removeRelation = function(relation) {
+        var pos = $scope.relations.indexOf(relation);
+        if (pos >= 0) {
+            $scope.relations.splice(pos, 1);
+        }
     };
 
     $scope.mouseOverIndex = -1;

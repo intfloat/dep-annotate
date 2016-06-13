@@ -93,7 +93,11 @@
 
         <div id="new-relation-dialog" title="Click to remove relations">
           <form>
-                 <ul class="list-group" id="relation-list">
+                 <ul class="list-group" ng-if="openDeleteDialog">
+                     <li class="list-group-item" ng-repeat="relation in relations track by $index" ng-click="removeRelation(relation)">
+                         {{relation}}
+                         <img src="./css/images/remove.jpeg" style="width:20px;height:20px;" align="right">
+                     </li>
                 </ul>
           </form>
         </div>
