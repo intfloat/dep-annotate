@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('DepAnnotate', ['ngFileUpload']);
+var app = angular.module('DepAnnotate', ['ngFileUpload', 'ngToast']);
 
 app.constant('CONSTANTS', {
         relations: ['attribution', 'background', 'cause',
@@ -55,9 +55,15 @@ app.service('Utils', function() {
     };
 });
 
+app.config(['ngToastProvider', function(ngToastProvider) {
+    ngToastProvider.configure({
+        horizontalPosition: 'center'
+    });
+}]);
+
 app.controller('EDUListController',
-                    ['$scope', 'Upload', 'CONSTANTS', 'Utils',
-                    function($scope, Upload, CONSTANTS, Utils) {
+                    ['$scope', 'Upload', 'CONSTANTS', 'Utils', 'ngToast',
+                    function($scope, Upload, CONSTANTS, Utils, ngToast) {
     var second = -1;
     var rel = '';
 
@@ -78,15 +84,24 @@ app.controller('EDUListController',
     $scope.addLabel = function() {
         var label = prompt('New relation:').trim().toLowerCase();
         if (!label) {
-            alert('ERROR: Can not be empty');
+            ngToast.danger({
+                content: 'ERROR: label can not be empty',
+                timeout: 2000
+            });
             return;
         }
         if ($scope.relations.indexOf(label) > 0) {
-            alert('ERROR: Relation ' + label + ' already exists.');
+            ngToast.danger({
+                content: 'ERROR: Label ' + label + ' already exists.',
+                timeout: 2000
+            });
             return;
         }
         $scope.relations.unshift(label);
-        alert('SUCCESSFULLY added new relation ' + label);
+        ngToast.success({
+           content: 'SUCCESSFULLY added new relation ' + label,
+            timeout: 2000
+        });
     };
     $scope.loadRawData = function(e) {
         var contents = e.target.result.split('\n');
@@ -115,7 +130,7 @@ app.controller('EDUListController',
             $scope.edus[i] = obj[i].text;
             $scope.depRel[i] = obj[i].relation;
         }
-        $scope.$digest();
+        $scope.$apply();
         for (i = 0; i < $scope.fa.length; ++i) {
             if ($scope.fa[i] >= 0) {
                 drawCurve('parent' + $scope.fa[i].toString(), 'parent' + i.toString(), 'red');
@@ -181,11 +196,17 @@ app.controller('EDUListController',
     $scope.deleteEdge = function () {
         // delete edge between selected EDU and its father
         if ($scope.first < 0 || $scope.first >= $scope.fa.length) {
-            alert('ERROR: No node selected!');
+            ngToast.danger({
+                content: 'ERROR: No node selected!',
+                timeout: 2000
+            });
             return;
         }
         if ($scope.fa[$scope.first] < 0) {
-            alert('ERROR: No incoming edge for current node!');
+            ngToast.danger({
+                content: 'ERROR: No incoming edge for current node!',
+                timeout: 2000
+            });
             return;
         }
         var id1 = $scope.fa[$scope.first], id2 = $scope.first;
@@ -205,7 +226,7 @@ app.controller('EDUListController',
             buttons: {
                 OK: function() {
                     $scope.openDeleteDialog = false;
-                    $scope.$digest();
+                    $scope.$apply();
                     dialog.dialog('close');
                 }
             }
@@ -218,6 +239,10 @@ app.controller('EDUListController',
         var pos = $scope.relations.indexOf(relation);
         if (pos >= 0) {
             $scope.relations.splice(pos, 1);
+            ngToast.info({
+                content: 'Successfully removed relation ' + relation,
+                timeout: 2000
+            });
         }
     };
 
@@ -285,7 +310,7 @@ app.controller('EDUListController',
             $scope.first = -1; second = -1;
             $scope.showAddDialog = false;
             dialog.dialog('close');
-            $scope.$digest();
+            $scope.$apply();
         }
         dialog = $("#dialog-form").dialog({
             autoOpen: false,
@@ -385,14 +410,21 @@ app.controller('EDUListController',
                     $scope.relations.push(r);
                 }
             }
-            alert('SUCCESSFULLY load ' + $scope.relations.length.toString() + ' relations.');
+            ngToast.success({
+               content: 'SUCCESSFULLY load ' + $scope.relations.length.toString() + ' relations.',
+               timeout: 2000
+            });
+            $scope.$apply();
         };
         reader.readAsText(file);
     };
 
     var addRelation = function(id2, relation) {
         if (!relation) {
-            alert('Invalid relation');
+            ngToast.danger({
+                content: 'Invalid relation',
+                timeout: 2000
+            });
             return;
         }
         var centerZ = Utils.findPos(angular.element('#' + id2)[0]);
