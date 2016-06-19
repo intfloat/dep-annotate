@@ -1,0 +1,26 @@
+{
+  "name": "depAnnotate",
+  "homepage": "https://github.com/intfloat/dep-annotate",
+  "authors": [
+    "wangliang <wangliangpeking@gmail.com>"
+  ],
+  "description": "An easy-to-use dependency tree annotation tool",
+  "main": "index.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.5.7",
+    "bootstrap": "^3.3.6",
+    "ngToast": "ngtoast#^2.0.0",
+    "ng-file-upload": "^12.0.4",
+    "file-saver": "^1.3.2",
+    "underscore": "^1.8.3",
+    "jquery-ui": "^1.11.4"
+  }
+}

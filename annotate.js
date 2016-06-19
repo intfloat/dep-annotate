@@ -78,7 +78,7 @@ app.controller('EDUListController',
     $scope.canvas_height = 700;
     $scope.canvas_width = CONSTANTS.CANVAS_WIDTH;
     $scope.$watch('edus.length', function() {
-        // empircal formula
+        // empirical formula
         $scope.canvas_height = ($scope.edus.length === 0) ? 700 : ($scope.edus.length / 75 * 4500 + 100);
     });
     $scope.addLabel = function() {

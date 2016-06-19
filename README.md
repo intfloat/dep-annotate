@@ -2,6 +2,18 @@
 
 ![这里写图片描述](image/dep.jpg)
 
+## 运行
+
+依赖库安装
+
+    bower install
+    
+在当前目录启动任何一个[web server](https://en.wikipedia.org/wiki/Web_server),比如:
+
+    python -m SimpleHTTPServer
+
+访问```127.0.0.1:8000```即可
+
 ## 已实现功能
 
 1.图形化标注
@@ -29,6 +41,8 @@
 [Underscore.js](https://github.com/jashkenas/underscore)
 
 [ng-file-upload](https://github.com/danialfarid/ng-file-upload)
+
+[ngToast](https://github.com/tameraydin/ngToast)
 
 ## 设计原则
 

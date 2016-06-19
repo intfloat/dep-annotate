@@ -2,22 +2,21 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Dependency Tree Annotate Tool</title>
-        <script src="./js/jquery-1.11.3.min.js"></script>
-        <script src="./js/bootstrap.min.js"></script>
-        <script src="./js/jquery-ui.min.js"></script>
-        <script src="./js/FileSaver.min.js"></script>
-        <script src="./js/angular.min.js"></script>
-        <script src="./js/underscore-min.js"></script>
-        <script src="./js/ng-file-upload.min.js"></script>
-        <script src="./js/angular-sanitize.min.js"></script>
-        <script src="./js/ngToast.min.js"></script>
+        <script src="./bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="./bower_components/jquery-ui/jquery-ui.min.js"></script>
+        <script src="./bower_components/file-saver/FileSaver.min.js"></script>
+        <script src="./bower_components/angular/angular.min.js"></script>
+        <script src="./bower_components/underscore/underscore-min.js"></script>
+        <script src="./bower_components/ng-file-upload/ng-file-upload.min.js"></script>
+        <script src="./bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+        <script src="./bower_components/ngToast/dist/ngToast.min.js"></script>
 
-        <link href="./css/bootstrap.min.css" rel="stylesheet">
-        <link href="./css/jquery-ui.min.css" rel="stylesheet">
-        <link href="./css/jquery-ui.structure.min.css" rel="stylesheet">
-        <link href="./css/jquery-ui.theme.min.css" rel="stylesheet">
-        <link href="./css/ngToast.min.css" rel="stylesheet">
-        <link href="./css/ngToast-animations.min.css" rel="stylesheet">
+        <link href="./bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="./bower_components/jquery-ui/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
+        <link href="./bower_components/jquery-ui/themes/smoothness/theme.css" rel="stylesheet">
+        <link href="./bower_components/ngToast/dist/ngToast.min.css" rel="stylesheet">
+        <link href="./bower_components/ngToast/dist/ngToast-animations.min.css" rel="stylesheet">
         <link href="./css/custom.css" rel="stylesheet">
         <script src="./annotate.js"></script>
     </head>
@@ -101,7 +100,7 @@
                  <ul class="list-group" ng-if="openDeleteDialog">
                      <li class="list-group-item" ng-repeat="relation in relations track by $index" ng-click="removeRelation(relation)">
                          {{relation}}
-                         <img src="./css/images/remove.jpeg" style="width:20px;height:20px;" align="right">
+                         <img src="./image/remove.jpeg" style="width:20px;height:20px;" align="right">
                      </li>
                 </ul>
           </form>
