@@ -3,15 +3,16 @@
 var app = angular.module('DepAnnotate', ['ngFileUpload', 'ngToast']);
 
 app.constant('CONSTANTS', {
-        relations: ['attribution', 'background', 'cause',
+        relations: ['ROOT', 'attribution', 'background', 'cause',
                         'comparison', 'condition', 'contrast',
                         'elaboration', 'enablement', 'evaluation',
                         'explanation', 'joint', 'manner-means',
                         'summary', 'temporal', 'topic-change',
                         'topic-comment', 'same-unit', 'textual'],
-        blinkColor: '#00ffff',
+        BLINK_COLOR: '#00ffff',
+        NORMAL_COLOR: 'red',
         MAX_N: 150,
-        CANVAS_WIDTH: 1500
+        CANVAS_WIDTH: 1500  // canvas_height will be automatically set.
 });
 
 app.filter('TransformParent', function() {
@@ -22,10 +23,7 @@ app.filter('TransformParent', function() {
 
 app.filter('TailorString', ['CONSTANTS', function(CONSTANTS) {
    return function(s) {
-       if (s.length > CONSTANTS.MAX_N) {
-           s = s.substr(0, CONSTANTS.MAX_N);
-       }
-       return s;
+       return s.substr(0, CONSTANTS.MAX_N);
    };
 }]);
 
@@ -47,10 +45,7 @@ app.service('Utils', function() {
             while (i >= 0 && s[i] >= '0' && s[i] <= '9') {
                 --i;
             }
-            return parseInt(s.substr(i + 1));
-        },
-       endsWith: function(str, suffix) {
-            return str.indexOf(suffix, str.length - suffix.length) !== -1;
+            return parseInt(s.substr(i + 1), 10) || 0;
         }
     };
 });
@@ -74,7 +69,7 @@ app.controller('EDUListController',
     $scope.depRel = [];
     $scope.relations = CONSTANTS.relations;
     $scope.operations = [];
-    $scope.blinkColor = CONSTANTS.blinkColor;
+    $scope.blinkColor = CONSTANTS.BLINK_COLOR;
     $scope.canvas_height = 700;
     $scope.canvas_width = CONSTANTS.CANVAS_WIDTH;
     $scope.$watch('edus.length', function() {
@@ -105,46 +100,32 @@ app.controller('EDUListController',
     };
     $scope.loadRawData = function(e) {
         var contents = e.target.result.split('\n');
-        $scope.edus = ['ROOT'];
-        var i;
-        for (i = contents.length - 1; i >= 0; --i) {
-            if (contents[i].length === 0) {
-                contents.splice(i, 1);
-            }
-        }
-        $scope.fa = _.range(contents.length + 1).map(function() { return -1; });
-        $scope.depRel = _.range(contents.length + 1).map(function() { return 'null'; });
-        for (i = 0; i < contents.length; i++) {
-            $scope.edus.push(contents[i]);
-        }
+        $scope.edus = _.filter(contents, function(s) { return s.length > 0} );
+        $scope.edus.unshift('ROOT');
+
+        $scope.fa = _.range($scope.edus.length).map(function() { return -1; });
+        $scope.depRel = _.range($scope.edus.length).map(function() { return 'null'; });
     };
     $scope.loadJsonData = function(e) {
-        var obj = JSON.parse(e.target.result);
-        var i;
-        $scope.fa = [];
-        $scope.depRel = [];
-        $scope.edus = [];
-        obj = obj.root;
-        for (i = 0; i < obj.length; ++i) {
-            $scope.fa[i] = obj[i].parent;
-            $scope.edus[i] = obj[i].text;
-            $scope.depRel[i] = obj[i].relation;
-        }
+        var obj = JSON.parse(e.target.result).root;
+        $scope.fa = _.pluck(obj, 'parent');
+        $scope.depRel = _.pluck(obj, 'relation');
+        $scope.edus = _.pluck(obj, 'text');
         $scope.$apply();
-        for (i = 0; i < $scope.fa.length; ++i) {
+        for (var i = 0; i < $scope.fa.length; ++i) {
             if ($scope.fa[i] >= 0) {
-                drawCurve('parent' + $scope.fa[i].toString(), 'parent' + i.toString(), 'red');
+                drawCurve('parent' + $scope.fa[i].toString(), 'parent' + i.toString(), CONSTANTS.NORMAL_COLOR);
                 addRelation('parent' + i.toString(), $scope.depRel[i]);
             }
         }
     };
     $scope.progress = 0;                    
-    $scope.$watch('fa', function() {
-        var total = $scope.fa.length - 1;
+    $scope.$watchCollection('fa', function() {
+        var total = _.size($scope.fa) - 1;
         if (total <= 0) return;
         var labeled = (_.filter($scope.fa.slice(1), function(e) { return e >= 0; })).length;
         $scope.progress = labeled * 100 / total;
-    }, true);
+    });
                         
     $scope.handleFileSelect = function ($files) {
         if (!$files || !$files[0]) {
@@ -157,7 +138,7 @@ app.controller('EDUListController',
         $scope.first = second = -1;
         $scope.inputFile = $files[0];
         var reader = new FileReader();
-        if (Utils.endsWith($scope.inputFile.name, '.dep')) {
+        if ($scope.inputFile.name.endsWith('.dep')) {
             reader.onload = $scope.loadJsonData;
         }
         else {
@@ -188,7 +169,7 @@ app.controller('EDUListController',
             var id1 = op.id1, id2 = op.id2;
             $scope.fa[id2] = id1;
             $scope.depRel[id2] = op.relation;
-            connect(id1, id2, 'red', $scope.depRel[id2]);
+            connect(id1, id2, CONSTANTS.NORMAL_COLOR, $scope.depRel[id2]);
         }
         $scope.operations.pop();
     };
@@ -257,10 +238,10 @@ app.controller('EDUListController',
         ctx.clearRect(0, 0, $scope.canvas_width, $scope.canvas_height);
         for (var i = 0; i < $scope.fa.length; ++i) {
             if (i === pos && $scope.fa[i] >= 0) {
-                connect($scope.fa[i], i, CONSTANTS.blinkColor, $scope.depRel[i]);
+                connect($scope.fa[i], i, CONSTANTS.BLINK_COLOR, $scope.depRel[i]);
             }
             else if ($scope.fa[i] >= 0) {
-                connect($scope.fa[i], i, 'red', $scope.depRel[i]);
+                connect($scope.fa[i], i, CONSTANTS.NORMAL_COLOR, $scope.depRel[i]);
             }
         }
     };
@@ -275,7 +256,7 @@ app.controller('EDUListController',
         ctx.clearRect(0, 0, $scope.canvas_width, $scope.canvas_height);
         _.each($scope.fa, function(v, i) {
             if (v >= 0) {
-                connect(v, i, 'red', $scope.depRel[i]);
+                connect(v, i, CONSTANTS.NORMAL_COLOR, $scope.depRel[i]);
             }
         });
     };
@@ -302,7 +283,7 @@ app.controller('EDUListController',
             $scope.fa[second] = $scope.first;
             var id1 = 'parent' + $scope.first.toString();
             var id2 = 'parent' + second.toString();
-            drawCurve(id1, id2, 'red');
+            drawCurve(id1, id2, CONSTANTS.NORMAL_COLOR);
             addRelation(id2, rel);
             var op = {type: 'connect', id1: $scope.first.toString(), id2: second.toString()};
             $scope.operations.push(op);
@@ -387,7 +368,7 @@ app.controller('EDUListController',
         ctx.clearRect(0, 0, $scope.canvas_width, $scope.canvas_height);
         for (var i = 0; i < $scope.fa.length; ++i) {
             if ($scope.fa[i] >= 0) {
-                connect($scope.fa[i], i, 'red', $scope.depRel[i]);
+                connect($scope.fa[i], i, CONSTANTS.NORMAL_COLOR, $scope.depRel[i]);
             }
         }
     };
