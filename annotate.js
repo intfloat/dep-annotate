@@ -238,7 +238,7 @@ app.controller('EDUListController',
         ctx.clearRect(0, 0, $scope.canvas_width, $scope.canvas_height);
         for (var i = 0; i < $scope.fa.length; ++i) {
             if (i === pos && $scope.fa[i] >= 0) {
-                connect($scope.fa[i], i, CONSTANTS.BLINK_COLOR, $scope.depRel[i]);
+                connect($scope.fa[i], i, CONSTANTS.BLINK_COLOR, $scope.depRel[i], 20);
             }
             else if ($scope.fa[i] >= 0) {
                 connect($scope.fa[i], i, CONSTANTS.NORMAL_COLOR, $scope.depRel[i]);
@@ -355,9 +355,9 @@ app.controller('EDUListController',
         ctx.fill();
     };
 
-    var connect = function(id1, id2, color, rel) {
+    var connect = function(id1, id2, color, rel, fontSize) {
         drawCurve('parent' + id1, 'parent' + id2, color);
-        addRelation('parent' + id2, rel);
+        addRelation('parent' + id2, rel, fontSize);
     };
 
     var disconnect = function(id1, id2) {
@@ -400,7 +400,7 @@ app.controller('EDUListController',
         reader.readAsText(file);
     };
 
-    var addRelation = function(id2, relation) {
+    var addRelation = function(id2, relation, fontSize) {
         if (!relation) {
             ngToast.danger({
                 content: 'Invalid relation',
@@ -408,6 +408,7 @@ app.controller('EDUListController',
             });
             return;
         }
+        fontSize = fontSize || 12;
         var centerZ = Utils.findPos(angular.element('#' + id2)[0]);
         centerZ.x += angular.element('#' + id2)[0].style.width;
         centerZ.y += angular.element('#' + id2)[0].style.height;
@@ -416,10 +417,10 @@ app.controller('EDUListController',
         centerZ.y -= canvasPos.y;
         centerZ.y += 15;
         var ctx = angular.element('#canvas')[0].getContext('2d');
-        ctx.font = "10px Arial";
+        ctx.font = fontSize.toString() + "px Arial";
         ctx.fillStyle = 'blue';
-        while (relation.length < 42) relation = ' ' + relation;
-        ctx.fillText(relation, 0, centerZ.y);
+        while (relation.length < 12) relation = ' ' + relation;
+        ctx.fillText(relation, centerZ.x - fontSize * 7, centerZ.y);
     };
 
 }]);
