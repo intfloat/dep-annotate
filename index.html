@@ -21,7 +21,9 @@
         <script src="./annotate.js"></script>
     </head>
     <body id="body" ng-app="DepAnnotate" ng-controller="EDUListController">
-        <canvas id="canvas" height="{{canvas_height}}" width="{{canvas_width}}"></canvas>
+        <canvas id="canvas" height="{{canvas_height}}" width="{{canvas_width}}">
+            当前浏览器不支持HTML5 canvas API, 请使用新版本的chrome或者firefox浏览器
+        </canvas>
         <toast></toast>
         <div class="container menu-bar">
             <div class="col-sm-2">
