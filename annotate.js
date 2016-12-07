@@ -153,7 +153,7 @@ app.controller('EDUListController',
             var cur = {parent: $scope.fa[i], text: $scope.edus[i], relation: $scope.depRel[i]};
             data.root.push(cur);
         }
-        var outFileName = $scope.inputFile + '.dep';
+        var outFileName = $scope.inputFile.endsWith('.dep') ? $scope.inputFile : $scope.inputFile + '.dep';
         var blob = new Blob([JSON.stringify(data, null, '\t')], {type: "text/plain;charset=utf-8"});
         saveAs(blob, outFileName);
     };
