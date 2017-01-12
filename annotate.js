@@ -150,7 +150,7 @@ app.controller('EDUListController',
     $scope.saveToFile = function() {
         var data = {root: []};
         for (var i = 0; i < $scope.fa.length; ++i) {
-            var cur = {parent: $scope.fa[i], text: $scope.edus[i], relation: $scope.depRel[i]};
+            var cur = {id: i, parent: $scope.fa[i], text: $scope.edus[i], relation: $scope.depRel[i]};
             data.root.push(cur);
         }
         var outFileName = $scope.inputFile.endsWith('.dep') ? $scope.inputFile : $scope.inputFile + '.dep';
